@@ -1,0 +1,14 @@
+# pixi environments
+.pixi/*
+!.pixi/config.toml
+
+# Environment secrets
+.env
+
+# Raw datasets (trailing slash ignores the entire folder directory)
+raw data/
+
+# Cache directories
+.cache/
+__pycache__/
+.pixi/
