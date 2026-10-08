@@ -4,10 +4,13 @@
 
 # Environment secrets
 .env
+.env.*
+!.env.example
 
 # Raw datasets (trailing slash ignores the entire folder directory)
 raw data/
 data/
+class 1/*.json
 
 # Cache directories
 .cache/

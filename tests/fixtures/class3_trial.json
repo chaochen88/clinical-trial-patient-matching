@@ -1,0 +1,7 @@
+{
+  "nct_id": "SYNTHETIC-COVERAGE",
+  "synthetic": true,
+  "source": "Manually authored test fixture, not a registered trial",
+  "updated_at": "synthetic-v0.1",
+  "criteria": "Inclusion Criteria:\n* Synthetic requirement A\n* Participants must have been using multiple daily injections without interruption for at least 3 months\n* Participants must have HbA1c values of 5.6% to 9.5%, inclusive\n* Synthetic requirement B\nExclusion Criteria:\n* Synthetic requirement C\n* Have any episodes of severe hypoglycemia and/or hypoglycemia unawareness within the 6 months prior to screening\n* Synthetic requirement D\n* Synthetic requirement E\n* Synthetic requirement F\n* Synthetic requirement G\n* Synthetic requirement H"
+}
