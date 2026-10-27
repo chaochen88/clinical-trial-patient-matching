@@ -1,0 +1,31 @@
+{
+  "label": "synthetic_engineering_fixture_not_clinical_validation",
+  "assessment_time": "2021-01-13T23:59:59-05:00",
+  "patients": [
+    {"id": "S01", "condition": "type 2 diabetes", "age": 62, "bmi": 29, "hba1c": 6.2},
+    {"id": "S02", "condition": "type 2 diabetes", "age": 55, "bmi": 32, "hba1c": 7.1},
+    {"id": "S03", "condition": "type 2 diabetes", "age": 70, "bmi": null, "hba1c": 8.0},
+    {"id": "S04", "condition": "type 2 diabetes", "age": 48, "bmi": 28, "hba1c": null},
+    {"id": "S05", "condition": "type 2 diabetes", "age": 81, "bmi": 30, "hba1c": 7.0},
+    {"id": "S06", "condition": "type 1 diabetes", "age": 30, "bmi": 24, "hba1c": 7.5},
+    {"id": "S07", "condition": "type 1 diabetes", "age": 45, "bmi": 29, "hba1c": 8.2},
+    {"id": "S08", "condition": "type 1 diabetes", "age": 60, "bmi": 31, "hba1c": 6.5},
+    {"id": "S09", "condition": "type 1 diabetes", "age": 24, "bmi": null, "hba1c": 11.3},
+    {"id": "S10", "condition": "obesity", "age": 50, "bmi": 34, "hba1c": 5.5},
+    {"id": "S11", "condition": "obesity", "age": 65, "bmi": 36, "hba1c": 5.8},
+    {"id": "S12", "condition": "obesity", "age": 40, "bmi": 38, "hba1c": 5.3},
+    {"id": "S13", "condition": "obesity", "age": 78, "bmi": 35, "hba1c": 5.9},
+    {"id": "S14", "condition": "hypertension", "age": 62, "bmi": 29, "hba1c": 5.3},
+    {"id": "S15", "condition": "asthma", "age": 25, "bmi": 23, "hba1c": 5.1},
+    {"id": "S16", "condition": "osteoarthritis", "age": 68, "bmi": 28, "hba1c": 5.5},
+    {"id": "S17", "condition": "migraine", "age": 42, "bmi": 26, "hba1c": 5.2},
+    {"id": "S18", "condition": "chronic kidney disease", "age": 72, "bmi": 30, "hba1c": 5.9},
+    {"id": "S19", "condition": "healthy control", "age": 55, "bmi": 25, "hba1c": 5.4},
+    {"id": "S20", "condition": "healthy control", "age": 35, "bmi": 22, "hba1c": 5.0}
+  ],
+  "trials": [
+    {"id": "SYNTHETIC-T2", "condition": "type 2 diabetes", "inclusion": "Adults aged 45 to 75 with type 2 diabetes, BMI 27 to 36 and HbA1c below 8.5%.", "relevant": ["S01", "S02", "S03", "S04"]},
+    {"id": "SYNTHETIC-T1", "condition": "type 1 diabetes", "inclusion": "Adults with type 1 diabetes for detailed screening of insulin treatment history.", "relevant": ["S06", "S07", "S08", "S09"]},
+    {"id": "SYNTHETIC-OBESITY", "condition": "obesity", "inclusion": "Adults aged 18 to 75 with documented obesity for weight management screening.", "relevant": ["S10", "S11", "S12"]}
+  ]
+}
