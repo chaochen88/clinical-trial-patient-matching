@@ -1,0 +1,9 @@
+{
+  "trec_url": "https://raw.githubusercontent.com/ncbi-nlp/TrialGPT/1b3242cd50c153a9c324661d4a0bd94fc68a4226/dataset/trec_2021/queries.jsonl",
+  "trec_revision": "1b3242cd50c153a9c324661d4a0bd94fc68a4226",
+  "trec_full_file_sha256": "292ef5c4bb3393a800320386a7415e5919c3eaa95b9ae1d1b8ac43a65e51e00c",
+  "synthea_url": "https://synthetichealth.github.io/synthea-sample-data/downloads/synthea_sample_data_fhir_r4_sep2019.zip",
+  "archive_member": "fhir/Maxwell782_Koepp521_6343cfd0-d47f-4a20-b561-b33d6441f372.json",
+  "archive_sha256": "a6fc595d9c0f4c646746af42f861b5a12d03c856af158dd837c764dfb81b66f8",
+  "patient_sha256": "7420eb69b2e542aa1d631b51c2e482ad12082e1603c75ef53ef04bf0392294c9"
+}
