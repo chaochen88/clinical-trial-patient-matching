@@ -59,6 +59,11 @@ mimic-profiles = "python -m clinical_trial_patient_matching.mimic_adapter"
 retrieval-sources = "python scripts/prepare_class5.py"
 retrieve-patients = "python -m clinical_trial_patient_matching.retrieval"
 retrieval-engineering = "python scripts/evaluate_class5_engineering.py"
+assessment-cases = "python scripts/prepare_class6.py"
+assess-candidates = "python -m clinical_trial_patient_matching.assessment"
+assessment-evaluate = "python scripts/evaluate_class6.py"
+assessment-annotations = "python scripts/prepare_class6_annotations.py"
+assessment-heatmap = "python scripts/render_class6_heatmap.py"
 
 # --- Ruff Tooling Profiles ---
 [tool.ruff]

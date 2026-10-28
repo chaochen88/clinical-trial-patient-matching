@@ -5,6 +5,8 @@ are documented in [Patient profiles](docs/new_syllabus/class4_patient_profiles.m
 
 Class 5 adds [hybrid patient retrieval and reranking](docs/new_syllabus/class5_retrieval.md).
 
+Class 6 adds [criterion assessment and screening reports](docs/new_syllabus/class6_assessment.md).
+
 [MIMIC-IV cohort preparation](docs/new_syllabus/mimic_bigquery_cohort.md) covers
 bounded BigQuery exports and local conversion into patient profiles and search documents.
 
