@@ -16,6 +16,7 @@ dependencies = [
     "rank-bm25>=0.2.2,<0.3",
     "sentence-transformers>=3,<6",
     "google-cloud-bigquery>=3.46.2,<4",
+    "mcp[cli]>=2,<3",
 ]
 
 [build-system]
@@ -64,6 +65,8 @@ assess-candidates = "python -m clinical_trial_patient_matching.assessment"
 assessment-evaluate = "python scripts/evaluate_class6.py"
 assessment-annotations = "python scripts/prepare_class6_annotations.py"
 assessment-heatmap = "python scripts/render_class6_heatmap.py"
+class7-demo = "python scripts/prepare_class7.py"
+patient-mcp = "python -m clinical_trial_patient_matching.patient_mcp_server"
 
 # --- Ruff Tooling Profiles ---
 [tool.ruff]
