@@ -16,6 +16,12 @@ dependencies = [
     "rank-bm25>=0.2.2,<0.3",
     "sentence-transformers>=3,<6",
     "google-cloud-bigquery>=3.46.2,<4",
+    "mcp[cli]>=2,<3",
+    "langgraph-checkpoint-postgres>=3.2.1,<4",
+    "langfuse>=5.2.0,<6",
+    "fastapi>=0.165.0,<0.166",
+    "uvicorn>=0.54.0,<0.55",
+    "psycopg[binary]>=3.3.9,<4",
 ]
 
 [build-system]
@@ -43,7 +49,7 @@ torch = { version = ">=2.6, <3", index = "https://download.pytorch.org/whl/cpu" 
 
 [tool.pixi.tasks]
 # Testubg python
-start = "python src/clinical_trial_patient_matching/main.py"
+start = "python -m clinical_trial_patient_matching.review_cli serve"
 # Validation Gate (Linter + Formatter checks + Package validation)
 check = "ruff check src/ && ruff format --check src/"
 # Testing Gate
@@ -56,6 +62,11 @@ extract-trial = "python -m clinical_trial_patient_matching.extraction"
 patient-profiles = "python -m clinical_trial_patient_matching.patients"
 patient-sources = "python scripts/prepare_class4.py"
 mimic-profiles = "python -m clinical_trial_patient_matching.mimic_adapter"
+mimic-notes-fetch = "python scripts/fetch_mimic_notes.py"
+mimic-notes-extract = "python -m clinical_trial_patient_matching.mimic_notes"
+mimic-notes-review = "python scripts/review_mimic_notes.py"
+mimic-pipeline-live = "python scripts/run_mimic_pipeline.py"
+mimic-pipeline-review = "python scripts/review_mimic_pipeline.py"
 retrieval-sources = "python scripts/prepare_class5.py"
 retrieve-patients = "python -m clinical_trial_patient_matching.retrieval"
 retrieval-engineering = "python scripts/evaluate_class5_engineering.py"
@@ -64,6 +75,13 @@ assess-candidates = "python -m clinical_trial_patient_matching.assessment"
 assessment-evaluate = "python scripts/evaluate_class6.py"
 assessment-annotations = "python scripts/prepare_class6_annotations.py"
 assessment-heatmap = "python scripts/render_class6_heatmap.py"
+class7-demo = "python scripts/prepare_class7.py"
+patient-mcp = "python -m clinical_trial_patient_matching.patient_mcp_server"
+class8-init = "python -m clinical_trial_patient_matching.review_cli init"
+class8-api = "python -m clinical_trial_patient_matching.review_cli serve"
+class8-worker = "python -m clinical_trial_patient_matching.review_cli worker"
+class8-demo = "python scripts/prepare_class8.py"
+class8-evaluate = "python -m clinical_trial_patient_matching.review_evaluation"
 
 # --- Ruff Tooling Profiles ---
 [tool.ruff]

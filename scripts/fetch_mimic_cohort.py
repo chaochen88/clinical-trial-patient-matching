@@ -1,4 +1,4 @@
-"""Export bounded MIMIC evidence for NCT03926806; never calls an external LLM."""
+"""Export bounded MIMIC hospital evidence; never calls an external LLM."""
 
 import argparse
 import hashlib
@@ -15,7 +15,35 @@ def write_json(path, value):
     path.write_text(json.dumps(value, indent=2, default=str), encoding="utf-8")
 
 
-def cohort_sql(dataset):
+def cohort_sql(dataset, reusable=False):
+    if reusable:
+        return f"""
+        WITH candidates AS (
+          SELECT p.subject_id, p.gender, p.anchor_age, p.anchor_year,
+                 a.hadm_id, a.admittime, a.dischtime AS assessment_time,
+                 p.anchor_age + EXTRACT(YEAR FROM a.admittime) - p.anchor_year
+                   AS approximate_age,
+                 ROW_NUMBER() OVER (PARTITION BY p.subject_id
+                   ORDER BY a.dischtime DESC, a.hadm_id DESC) AS admission_rank
+          FROM `{dataset}.patients` p
+          JOIN `{dataset}.admissions` a USING(subject_id)
+          WHERE a.dischtime IS NOT NULL
+            AND p.anchor_age + EXTRACT(YEAR FROM a.admittime) - p.anchor_year >= 18
+            AND p.subject_id NOT IN UNNEST(@excluded_ids)
+            AND EXISTS (
+              SELECT 1 FROM `physionet-data.mimiciv_note.discharge` n
+              JOIN `{dataset}.admissions` na
+                ON n.subject_id = na.subject_id AND n.hadm_id = na.hadm_id
+              WHERE n.subject_id = p.subject_id AND na.dischtime <= a.dischtime
+                AND n.charttime BETWEEN DATETIME_SUB(
+                      a.dischtime, INTERVAL @lookback_days DAY)
+                                    AND a.dischtime
+                AND n.storetime <= a.dischtime
+            )
+        )
+        SELECT * EXCEPT(admission_rank) FROM candidates WHERE admission_rank = 1
+        ORDER BY subject_id LIMIT @patient_count
+        """
     return f"""
     WITH candidates AS (
       SELECT p.subject_id, p.gender, p.anchor_age, p.anchor_year,
@@ -215,6 +243,8 @@ def main():
         "--dataset", help="Full project.dataset name; auto-detect versioned hosp"
     )
     parser.add_argument("--patients", type=int, default=20)
+    parser.add_argument("--reusable", action="store_true")
+    parser.add_argument("--exclude-cohort", type=Path)
     parser.add_argument("--lookback-days", type=int, default=365)
     parser.add_argument("--max-gib-per-query", type=float, default=5)
     parser.add_argument("--max-gib-total", type=float, default=20)
@@ -297,7 +327,7 @@ def main():
     manifest = {
         "status": "running",
         "started_at": datetime.now(UTC).isoformat(),
-        "trial_id": "NCT03926806",
+        "trial_id": None if args.reusable else "NCT03926806",
         "project": args.project,
         "dataset": dataset,
         "location": location,
@@ -328,6 +358,19 @@ def main():
         ],
     }
     per_query = int(args.max_gib_per_query * 1024**3)
+    if args.reusable:
+        if not args.exclude_cohort:
+            parser.error("--reusable requires --exclude-cohort")
+        manifest["assessment"] = (
+            "Latest adult admission with a discharge note available by discharge cutoff"
+        )
+        manifest["cohort_limitation"] = (
+            "Non-diabetes selection; availability of prior discharge notes "
+            "biases toward patients with documented repeat care"
+        )
+        manifest["excluded_cohort_sha256"] = hashlib.sha256(
+            args.exclude_cohort.read_bytes()
+        ).hexdigest()
     total_limit = int(args.max_gib_total * 1024**3)
     estimated = 0
 
@@ -391,7 +434,21 @@ def main():
 
     try:
         count = bigquery.ScalarQueryParameter("patient_count", "INT64", args.patients)
-        rows = fetch("cohort", cohort_sql(dataset), [count])
+        selection_parameters = [count]
+        if args.reusable:
+            excluded = [
+                json.loads(line)["subject_id"]
+                for line in args.exclude_cohort.read_text().splitlines()
+            ]
+            selection_parameters.extend(
+                [
+                    bigquery.ArrayQueryParameter("excluded_ids", "INT64", excluded),
+                    bigquery.ScalarQueryParameter(
+                        "lookback_days", "INT64", args.lookback_days
+                    ),
+                ]
+            )
+        rows = fetch("cohort", cohort_sql(dataset, args.reusable), selection_parameters)
         if not args.execute:
             manifest["status"] = "dry_run_only"
             return
@@ -400,12 +457,20 @@ def main():
             or len({r["subject_id"] for r in rows}) != args.patients
         ):
             raise RuntimeError("Did not obtain the requested number of unique patients")
+        lab_pattern = (
+            r"hba1c|hemoglobin a1c|glycohemoglobin|^creatinine$|^glucose$|"
+            r"^hemoglobin$|^platelet count$|^white blood cells$|^sodium$|"
+            r"^potassium$|^albumin$|bilirubin|alanine aminotransferase|"
+            r"aspartate aminotransferase"
+            if args.reusable
+            else r"hba1c|hemoglobin a1c|glycohemoglobin|^creatinine$"
+        )
         labs = fetch(
             "lab_dictionary",
             f"""
           SELECT itemid, label, fluid, category FROM `{dataset}.d_labitems`
           WHERE REGEXP_CONTAINS(LOWER(label),
-                r'hba1c|hemoglobin a1c|glycohemoglobin|^creatinine$')
+                r'{lab_pattern}')
             AND LOWER(fluid) = 'blood' ORDER BY itemid
         """,
             [],

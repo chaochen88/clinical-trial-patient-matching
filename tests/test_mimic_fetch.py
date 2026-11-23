@@ -55,3 +55,14 @@ def test_audit_rejects_incomplete_export(tmp_path):
     (tmp_path / "manifest.json").write_text(json.dumps({"status": "partial_or_failed"}))
     with pytest.raises(ValueError, match="incomplete"):
         fetcher.audit_export(tmp_path)
+
+
+def test_reusable_selection_excludes_existing_patients_and_future_notes():
+    sql = fetcher.cohort_sql("synthetic.hosp", reusable=True)
+    assert "NOT IN UNNEST(@excluded_ids)" in sql
+    assert "n.storetime <= a.dischtime" in sql
+    assert "na.dischtime <= a.dischtime" in sql
+    assert "n.hadm_id = na.hadm_id" in sql
+    assert "@lookback_days" in sql
+    assert "diabet" not in sql
+    assert "type (2|ii)" in fetcher.cohort_sql("synthetic.hosp")

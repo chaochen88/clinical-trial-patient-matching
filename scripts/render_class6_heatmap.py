@@ -14,7 +14,7 @@ def main():
     args = parser.parse_args()
     manifest = json.loads((args.input / "manifest.json").read_text(encoding="utf-8"))
     entries = [
-        (entry["path"], "Shared examples", entry["mode"])
+        (entry["path"], entry.get("cohort", "Shared examples"), entry["mode"])
         for entry in manifest["reports"]
     ]
     index = args.input / "shortlist/index.json"

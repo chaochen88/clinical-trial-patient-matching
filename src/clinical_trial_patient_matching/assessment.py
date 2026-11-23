@@ -3,7 +3,7 @@
 import argparse
 import json
 import math
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal, TypedDict
 
@@ -454,6 +454,28 @@ def validate_citations(interpretation, profile, supplied):
                 raise ValueError("Family/possible evidence cannot support a decision")
 
 
+def available_note_context(fact, assessment, time_basis):
+    """Note existence is dated; an event described inside it may remain undated."""
+    if (
+        fact.original.get("source_format") != "mimic_note"
+        or fact.original.get("time_basis") != time_basis
+        or time_basis != "mimic_shifted_clock_utc_tag_not_real_utc"
+        or not fact.available_time
+        or fact.available_time > assessment
+    ):
+        return False
+    value = fact.original.get("note_charttime")
+    if not value:
+        return False
+    try:
+        charted = datetime.fromisoformat(value)
+    except ValueError:
+        return False
+    if charted.tzinfo is not None:
+        return False
+    return charted.replace(tzinfo=UTC) <= assessment
+
+
 def assess(profile, trial, criterion, assessment, time_basis, interpreter=None):
     attempts, findings, skipped = [], [], []
     context = None
@@ -497,9 +519,14 @@ def assess(profile, trial, criterion, assessment, time_basis, interpreter=None):
         ):
             method = "narrative_interpretation"
             supplied, omitted, characters = [], [], 0
+            compact_facts, source_texts = [], {}
             for fact in profile.facts:
                 check_source(fact, profile)
-                if assessment and (not fact.clinical_time or not fact.available_time):
+                if (
+                    assessment
+                    and (not fact.clinical_time or not fact.available_time)
+                    and (not available_note_context(fact, assessment, time_basis))
+                ):
                     continue
                 if assessment and any(
                     t and t > assessment
@@ -510,18 +537,25 @@ def assess(profile, trial, criterion, assessment, time_basis, interpreter=None):
                 # rows can contain future end dates despite an earlier event time.
                 if not isinstance(fact.original.get("text"), str):
                     continue
-                size = len(fact.model_dump_json())
+                compact = fact.model_dump(mode="json", exclude={"original": {"text"}})
+                source = {"record_id": fact.record_id, "text": fact.original["text"]}
+                size = len(json.dumps(compact))
+                if fact.source_hash not in source_texts:
+                    size += len(json.dumps(source))
                 if len(supplied) >= 40 or characters + size > 60000:
                     omitted.append(fact.fact_id)
                     continue
                 supplied.append(fact)
+                compact_facts.append(compact)
+                source_texts[fact.source_hash] = source
                 characters += size
             context = {
                 "criterion": criterion.model_dump(mode="json"),
                 "assessment_time": assessment.isoformat() if assessment else None,
                 "time_basis": time_basis,
                 "profile_version": profile.profile_version,
-                "facts": [f.model_dump(mode="json") for f in supplied],
+                "facts": compact_facts,
+                "source_texts": source_texts,
                 "conflicts": profile.conflicts,
                 "findings": profile.findings,
                 "omitted_by_context_limit": omitted,
@@ -810,11 +844,15 @@ def build_workflow(output: Path, interpreter=None, configuration=None):
     return graph.compile()
 
 
-def anthropic_interpreter(model):
+def anthropic_interpreter(model, audit=None, transport_retries=0):
     from langchain_anthropic import ChatAnthropic
 
     structured = ChatAnthropic(
-        model=model, temperature=0, max_tokens=2048, max_retries=0
+        model=model,
+        temperature=0,
+        max_tokens=2048,
+        max_retries=transport_retries,
+        timeout=120,
     ).with_structured_output(
         Interpretation, method="function_calling", include_raw=True
     )
@@ -830,6 +868,20 @@ def anthropic_interpreter(model):
             ]
         )
         raw = response["raw"]
+        if audit:
+            audit(
+                {
+                    "context": context,
+                    "feedback": feedback,
+                    "raw": raw.model_dump(mode="json"),
+                    "parsed": response["parsed"].model_dump(mode="json")
+                    if response["parsed"] is not None
+                    else None,
+                    "parsing_error": str(response["parsing_error"])
+                    if response["parsing_error"]
+                    else None,
+                }
+            )
         if raw.response_metadata.get("stop_reason") == "max_tokens":
             raise ValueError("Truncated narrative interpretation")
         if response["parsed"] is None:

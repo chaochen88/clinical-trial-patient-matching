@@ -38,7 +38,7 @@
 <div class="foot" id="matrix-note"></div>
 </section>
 <section class="details" id="details" aria-label="Criterion and evidence details" aria-live="polite"></section>
-<footer><button id="save">Save this HTML</button>No live model calls. No external scripts, fonts, or network requests. Evidence is embedded in this file; handle it with the same access controls as the source reports.<br>Rules plus replay is a predefined teaching example, not a live Claude assessment.</footer>
+<footer><button id="save">Save this HTML</button>Viewing this saved report makes no model calls. No external scripts, fonts, or network requests. Evidence is embedded in this file; handle it with the same access controls as the source reports.<br>Rules plus replay is a predefined teaching example, not a live Claude assessment. Rules plus Claude uses saved live responses.</footer>
 </main>
 <script id="report-data" type="application/json">__REPORT_DATA__</script>
 <script>
@@ -57,7 +57,7 @@ function options(select, values, preferred) {
 options($('cohort'),reports.map(r=>r.cohort),'Class 5 shortlist');
 function setTrial(){options($('trial'),reports.filter(r=>r.cohort===$('cohort').value).map(r=>r.trial_id+' · '+r.trial_version.slice(0,8)));setMode();}
 function selectedTrial(r){return r.trial_id+' · '+r.trial_version.slice(0,8)===$('trial').value;}
-function setMode(){options($('mode'),reports.filter(r=>r.cohort===$('cohort').value&&selectedTrial(r)).map(r=>r.mode));render();}
+function setMode(){options($('mode'),reports.filter(r=>r.cohort===$('cohort').value&&selectedTrial(r)).map(r=>r.mode),$('mode').value||'rules-plus-claude');render();}
 function current(){return reports.filter(r=>r.cohort===$('cohort').value&&selectedTrial(r)&&r.mode===$('mode').value&&
   (r.patient_id+' '+r.variant).toLowerCase().includes($('search').value.toLowerCase()));}
 function detail(criterion, report, result){

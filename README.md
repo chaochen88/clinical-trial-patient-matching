@@ -7,6 +7,8 @@ Class 5 adds [hybrid patient retrieval and reranking](docs/new_syllabus/class5_r
 
 Class 6 adds [criterion assessment and screening reports](docs/new_syllabus/class6_assessment.md).
 
+Class 8 adds [persistent coordinator review, recovery, and Langfuse evaluation](docs/new_syllabus/class8_review.md).
+
 [MIMIC-IV cohort preparation](docs/new_syllabus/mimic_bigquery_cohort.md) covers
 bounded BigQuery exports and local conversion into patient profiles and search documents.
 

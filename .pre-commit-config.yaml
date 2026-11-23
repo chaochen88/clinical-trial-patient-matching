@@ -1,0 +1,15 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-source-check
+        name: Ruff source lint
+        entry: .pixi/envs/default/bin/ruff check src/
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: ruff-source-format
+        name: Ruff source formatting
+        entry: .pixi/envs/default/bin/ruff format --check src/
+        language: system
+        pass_filenames: false
+        always_run: true

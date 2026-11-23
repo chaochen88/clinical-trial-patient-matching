@@ -1,5 +1,9 @@
 # Initial MIMIC-IV BigQuery cohort
 
+The hospital-plus-notes extension is documented in
+[MIMIC note enrichment](mimic_note_enrichment.md). It retains the same cohort and
+cutoffs, adds exact-quoted narrative evidence, and keeps later-signed notes separate.
+
 `scripts/fetch_mimic_cohort.py` fetches a bounded retrospective evidence sample
 for the type-2-diabetes trial `NCT03926806`. It is a structured SQL exporter;
 it does not invoke Claude or generate patient eligibility decisions.
@@ -196,3 +200,7 @@ validated matching workflow or modify the existing patient profiles.
 Source definitions: [hospital tables](https://mimic.mit.edu/docs/iv/modules/hosp/),
 [laboratory events](https://mimic.mit.edu/docs/iv/modules/hosp/labevents.html),
 [OMR](https://mimic.mit.edu/docs/iv/modules/hosp/omr.html).
+
+For 20 additional patients selected independently of diabetes, broad note
+extraction, and a shared patient pool, see
+[Reusable MIMIC patient expansion](mimic_reusable_profiles.md).

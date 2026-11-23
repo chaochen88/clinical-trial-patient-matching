@@ -121,6 +121,21 @@ def convert_row(table, row, manifest, definitions):
             if re.search(r"hba1c|hemoglobin a1c|glycohemoglobin", label)
             else ("creatinine" if label == "creatinine" else None)
         )
+        if concept is None and label in {
+            "glucose",
+            "hemoglobin",
+            "platelet count",
+            "white blood cells",
+            "sodium",
+            "potassium",
+            "albumin",
+            "bilirubin, total",
+            "bilirubin, direct",
+            "bilirubin, indirect",
+            "alanine aminotransferase (alt)",
+            "aspartate aminotransferase (ast)",
+        }:
+            concept = label
         if concept is None or definition["fluid"].casefold() != "blood":
             raise ValueError("Lab concept requires a reviewed blood-item mapping")
         value = number_or_text(

@@ -16,3 +16,6 @@ class 1/*.json
 .cache/
 __pycache__/
 .pixi/
+debug.log
+.pytest_cache/
+.ruff_cache/
